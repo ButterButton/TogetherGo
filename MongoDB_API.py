@@ -26,8 +26,6 @@ def SerachByKey(key, value):
     return Response(dumps(data, ensure_ascii=False, indent=4), mimetype='text/json')
 
 def connect_mongo():
-    # client = MongoClient('104.248.144.87:27017',username = 'mono', password = 'monogo')
-
     # collection.stats
     # cursor = collection.find({"Products.ProductDetail.Value":{"$all":["S","M"]}})
     # data = [d for d in cursor]
