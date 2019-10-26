@@ -10,9 +10,6 @@ import configparser
 
 app = Flask(__name__)
 CORS(app)
-ConfigFile = configparser.ConfigParser()
-ConfigFile.read("config.py")
-MONGO_HOST = ConfigFile["DB_TogetherGo"]["ConnectString"]
 
 @app.route("/")
 def index():
@@ -39,7 +36,12 @@ def connect_mongo():
     # print(data)
     # pipeline = {"$lookup":{"from":"TogetherGo", "localField":"No", "foreignField":"No","as":"Notest"}}
     # pprint.pprint(list(db.get_collection("Order").aggregate([pipeline])))
-    client = MongoClient(MONGO_HOST)
+    ConfigFile = configparser.ConfigParser()
+    ConfigFile.read("config.py")
+    # print(ConfigFile["DB_TogetherGo"]["ConnectString"])
+    # print("mongodb://%s:%s@%s:%s/TogetherGo"%(ConfigFile["DB_TogetherGo"]["USER"],ConfigFile["DB_TogetherGo"]["PWD"],ConfigFile["DB_TogetherGo"]["HOST"], ConfigFile["DB_TogetherGo"]["PORT"]))
+    ConnectString = "mongodb://%s:%s@%s:%s/TogetherGo"%(ConfigFile["DB_TogetherGo"]["USER"],ConfigFile["DB_TogetherGo"]["PWD"],ConfigFile["DB_TogetherGo"]["HOST"], ConfigFile["DB_TogetherGo"]["PORT"])
+    client = MongoClient(ConnectString)
     db = client.TogetherGo   
     collection = db.Products
 
