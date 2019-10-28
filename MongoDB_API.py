@@ -15,7 +15,7 @@ CORS(app)
 def index():
     return "Welcome"
     
-@app.route("/POST/<key>/<value>")
+@app.route("/POST/<key>/<value>", methods=["POST"])
 def SerachByKey(key, value):
     collection = connect_mongo()
     cursor = collection.find({key:value})
