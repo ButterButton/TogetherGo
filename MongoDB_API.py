@@ -27,22 +27,26 @@ def SerachByKey(value):
     data = [d for d in cursor]
     return Response(dumps(data, ensure_ascii=False, indent=4), mimetype='text/json')
 
-@app.route("/POST/Order/<JsonValue>", methods=["POST"])
-def InsertByJson(JsonValue):
+@app.route("/POST/Order/<InsertPrdouctNo>", methods=["POST"])
+def InsertByJson(InsertPrdouctNo):
     db = connect_mongo()
-    twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
-    afterload = json.loads(JsonValue)
-    afterload["Test"] = "87"
-    print(afterload)
-    # Result = db.Order.insert(json.loads(JsonValue))
-    # Result = db.Order.insert({"Date":test1time})
-    # Result = db.Order.insert_many([{"Date":test1time},{"Date":test2time},{"Date":test3time},{"Date":testtimestrTodatetime}])
-    # data = [d for d in db.Order.find({"_id":Result})]
-    # if(len(data) < 1):
-    #     return Response(dumps({"Result":"Fail","Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
 
-    # return Response(dumps({"Result":"Success","Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
-    return "HI"
+    # 伺服器電腦時間轉換
+    # twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
+    # 本機(台灣)電腦時間
+    twtime = datetime.datetime.now()
+
+    LastestOrderNo = db.Order.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
+    LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
+    LastestOrderNo = "O" + str(LastestNumber)
+    print(LastestOrderNo)
+    Order = {"OrderDate":twtime, "No":LastestOrderNo, "ProductNo":InsertPrdouctNo, "OrderList":[]}
+    Result = db.Order.insert(Order)
+    data = db.Order.find({"_id":Result})[0]
+    if(len(data) < 1):
+        return Response(dumps({"Result":"Fail"}, ensure_ascii=False, indent=4), mimetype='text/json')
+
+    return Response(dumps({"Result":"Success","Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
 
 def connect_mongo():
     # collection.stats
