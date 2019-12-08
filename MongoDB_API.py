@@ -32,9 +32,9 @@ def InsertByJson(InsertPrdouctNo):
     db = connect_mongo()
 
     # 伺服器電腦時間轉換
-    # twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
+    twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
     # 本機(台灣)電腦時間
-    twtime = datetime.datetime.now()
+    # twtime = datetime.datetime.now()
 
     LastestOrderNo = db.Order.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
     LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
@@ -44,9 +44,9 @@ def InsertByJson(InsertPrdouctNo):
     Result = db.Order.insert(Order)
     data = db.Order.find({"_id":Result})[0]
     if(len(data) < 1):
-        return Response(dumps({"Result":"Fail"}, ensure_ascii=False, indent=4), mimetype='text/json')
+        return Response(dumps({"Result":"Fail", "Data":[]}, ensure_ascii=False, indent=4), mimetype='text/json')
 
-    return Response(dumps({"Result":"Success","Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
+    return Response(dumps({"Result":"Success", "Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
 
 def connect_mongo():
     # collection.stats
