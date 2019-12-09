@@ -18,7 +18,7 @@ CORS(app)
 
 @app.route("/")
 def index():
-    return "Welcome"
+    return "Welcome TogetherGo MongoDB API"
     
 @app.route("/GET/Products/No/<value>", methods=["GET"])
 def SerachByKey(value):
@@ -28,7 +28,7 @@ def SerachByKey(value):
     return Response(dumps(data, ensure_ascii=False, indent=4), mimetype='text/json')
 
 @app.route("/POST/Order/<InsertPrdouctNo>", methods=["POST"])
-def InsertByJson(InsertPrdouctNo):
+def InsertOrderByJson(InsertPrdouctNo):
     db = connect_mongo()
 
     # 伺服器電腦時間轉換
@@ -37,17 +37,30 @@ def InsertByJson(InsertPrdouctNo):
     # twtime = datetime.datetime.now()
 
     LastestOrderNo = db.Order.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
-    LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
-    LastestOrderNo = "O" + str(LastestNumber)
+    # LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
+    LastestOrderNo = GetLastestNumber(LastestOrderNo, "O")
     print(LastestOrderNo)
     Order = {"OrderDate":twtime, "No":LastestOrderNo, "ProductNo":InsertPrdouctNo, "OrderList":[]}
     Result = db.Order.insert(Order)
     data = db.Order.find({"_id":Result})[0]
-    if(len(data) < 1):
-        return Response(dumps({"Result":"Fail", "Data":[]}, ensure_ascii=False, indent=4), mimetype='text/json')
 
-    return Response(dumps({"Result":"Success", "Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
+    return ResponseResult(data)
+    # if(len(data) < 1):
+    #     return Response(dumps({"Result":"Fail", "Data":[]}, ensure_ascii=False, indent=4), mimetype='text/json')
 
+    # return Response(dumps({"Result":"Success", "Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
+
+@app.route("/POST/Products/<InsertProductJson>", methods=["POST"])
+def InsertProductByJson(InsertProductJson):
+    db = connect_mongo()
+    InsertProductJson = json.loads(InsertProductJson)
+    LastestProductNo = db.Products.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
+    LastestProductNo = GetLastestNumber(LastestProductNo, "P")
+    ProductsFormat = {"No":LastestProductNo,"Name":InsertProductJson["Name"],"Price":InsertProductJson["Price"],"Url":InsertProductJson["Url"],"PicUrl":InsertProductJson["PicUrl"], "ProductDetail":[]}
+    Result = db.Products.insert(ProductsFormat)
+    ResultData = db.Products.find({"_id":Result})[0]
+
+    return ResponseResult(ResultData)
 def connect_mongo():
     # collection.stats
     # cursor = collection.find({"Products.ProductDetail.Value":{"$all":["S","M"]}})
@@ -73,7 +86,17 @@ def connect_mongo():
 
     return db
 
+def GetLastestNumber(EndNumber, PkCode):
+    LastestNumber = int(str(EndNumber).lstrip(PkCode)) + 1
+    LastestOrderNo = PkCode + str(LastestNumber)
 
+    return LastestOrderNo
+
+def ResponseResult(ResultData):
+    if(len(ResultData) < 1):
+        return Response(dumps({"Result":"Fail", "Data":[]}, ensure_ascii=False, indent=4), mimetype='text/json')
+
+    return Response(dumps({"Result":"Success", "Data":ResultData}, ensure_ascii=False, indent=4), mimetype='text/json')
 if __name__ == "__main__":
     app.run(debug=True)
 
