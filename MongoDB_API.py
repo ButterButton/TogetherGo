@@ -61,6 +61,16 @@ def InsertProductByJson(InsertProductJson):
     ResultData = db.Products.find({"_id":Result})[0]
 
     return ResponseResult(ResultData)
+
+@app.route("/POST/ProductDetail/<ProductNo>/<InsertProductDetailJson>", methods=["POST"])
+def InsertProductDetailByJson(ProductNo, InsertProductDetailJson):
+    db = connect_mongo()
+    ProductDetailJson = json.loads(InsertProductDetailJson)
+    ProductNo = ProductNo
+    ResultData = db.Products.update({"No":ProductNo},{"$set":{"ProductDetail":ProductDetailJson}})
+
+    return ResponseResult(ResultData)
+
 def connect_mongo():
     # collection.stats
     # cursor = collection.find({"Products.ProductDetail.Value":{"$all":["S","M"]}})
