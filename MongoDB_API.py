@@ -27,28 +27,12 @@ def SerachByKey(value):
     data = [d for d in cursor]
     return Response(dumps(data, ensure_ascii=False, indent=4), mimetype='text/json')
 
-@app.route("/POST/Order/<InsertPrdouctNo>", methods=["POST"])
-def InsertOrderByJson(InsertPrdouctNo):
+@app.route("/GET/Products/Top100", methods=["GET"])
+def SerachProductsTop100():
     db = connect_mongo()
-
-    # 伺服器電腦時間轉換
-    twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
-    # 本機(台灣)電腦時間
-    # twtime = datetime.datetime.now()
-
-    LastestOrderNo = db.Order.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
-    # LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
-    LastestOrderNo = GetLastestNumber(LastestOrderNo, "O")
-    print(LastestOrderNo)
-    Order = {"OrderDate":twtime, "No":LastestOrderNo, "ProductNo":InsertPrdouctNo, "OrderList":[]}
-    Result = db.Order.insert(Order)
-    data = db.Order.find({"_id":Result})[0]
-
-    return ResponseResult(data)
-    # if(len(data) < 1):
-    #     return Response(dumps({"Result":"Fail", "Data":[]}, ensure_ascii=False, indent=4), mimetype='text/json')
-
-    # return Response(dumps({"Result":"Success", "Data":data}, ensure_ascii=False, indent=4), mimetype='text/json')
+    cursor = db.Products.find({}).sort("No", pymongo.ASCENDING).limit(100)
+    data = [d for d in cursor]
+    return Response(dumps(data, ensure_ascii=False, indent=4), mimetype='text/json')
 
 @app.route("/POST/Products/<InsertProductJson>", methods=["POST"])
 def InsertProductByJson(InsertProductJson):
@@ -70,6 +54,25 @@ def InsertProductDetailByJson(ProductNo, InsertProductDetailJson):
     ResultData = db.Products.update({"No":ProductNo},{"$set":{"ProductDetail":ProductDetailJson}})
 
     return ResponseResult(ResultData)
+
+@app.route("/POST/Order/<InsertPrdouctNo>", methods=["POST"])
+def InsertOrderByJson(InsertPrdouctNo):
+    db = connect_mongo()
+
+    # 伺服器電腦時間轉換
+    twtime = pytz.utc.localize(datetime.datetime.now()) + datetime.timedelta(hours=8)
+    # 本機(台灣)電腦時間
+    # twtime = datetime.datetime.now()
+
+    LastestOrderNo = db.Order.find({},{"No":1}).sort("No", pymongo.DESCENDING).limit(1)[0]["No"]
+    # LastestNumber = int(str(LastestOrderNo).lstrip("O")) + 1
+    LastestOrderNo = GetLastestNumber(LastestOrderNo, "O")
+    print(LastestOrderNo)
+    Order = {"OrderDate":twtime, "No":LastestOrderNo, "ProductNo":InsertPrdouctNo, "OrderList":[]}
+    Result = db.Order.insert(Order)
+    data = db.Order.find({"_id":Result})[0]
+
+    return ResponseResult(data)
 
 def connect_mongo():
     # collection.stats
