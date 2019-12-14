@@ -89,7 +89,7 @@ def connect_mongo():
     # pipeline = {"$lookup":{"from":"TogetherGo", "localField":"No", "foreignField":"No","as":"Notest"}}
     # pprint.pprint(list(db.get_collection("Order").aggregate([pipeline])))
     ConfigFile = configparser.ConfigParser()
-    ConfigFile.read("config.py")
+    ConfigFile.read("Config.py")
     # print(ConfigFile["DB_TogetherGo"]["ConnectString"])
     # print("mongodb://%s:%s@%s:%s/TogetherGo"%(ConfigFile["DB_TogetherGo"]["USER"],ConfigFile["DB_TogetherGo"]["PWD"],ConfigFile["DB_TogetherGo"]["HOST"], ConfigFile["DB_TogetherGo"]["PORT"]))
     ConnectString = "mongodb://%s:%s@%s:%s/TogetherGo"%(ConfigFile["DB_TogetherGo"]["USER"],ConfigFile["DB_TogetherGo"]["PWD"],ConfigFile["DB_TogetherGo"]["HOST"], ConfigFile["DB_TogetherGo"]["PORT"])
