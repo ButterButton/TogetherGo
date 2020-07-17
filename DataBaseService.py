@@ -155,10 +155,11 @@ class DataBaseService:
         DBService = self.GetDataBase()
         DBCursor = DBService.cursor()
 
-        SelectQuery = """SELECT * FROM TogetherGo.Order O, TogetherGo.Ordered OD, TogetherGo.OrderedDetail ODD, TogetherGo.ProductDetail PD
+        SelectQuery = """SELECT O.ID, OD.ID, P.Name, P.Price, OD.LineName, OD.Quantity, PD.Attribute, PD.Value
+                        FROM TogetherGo.Order O, TogetherGo.Ordered OD, TogetherGo.OrderedDetail ODD, TogetherGo.ProductDetail PD, TogetherGo.Product P
                         WHERE O.ID = OD.OrderID AND OD.ID = ODD.OrderedID AND OD.OrderID = %s AND OD.LineID = %s
                         AND OD.No IN (SELECT No FROM TogetherGo.Ordered WHERE OrderID = %s AND LineID = %s)
-                        AND PD.ID = ODD.ProductDetailID
+                        AND PD.ID = ODD.ProductDetailID AND P.ID = PD.ProductID
                         ORDER BY OD.No"""
         DBCursor.execute(SelectQuery, (QueryData["OrderID"], QueryData["LineID"], QueryData["OrderID"], QueryData["LineID"]))
         Result = DBCursor.fetchall()

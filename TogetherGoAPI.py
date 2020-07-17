@@ -132,20 +132,23 @@ def ConvertToOrdered(DBResult):
 
 def ConvertToOrderComplete(DBResult):
     GroupHeader = DBResult[0]
-    IDList = []
-    for OID in DBResult:
-        IDList.append(OID[6])
-    IDList = set(IDList)
-    #  0     1         2        3         4   5  6    7       8        9      10    11    12           13        14    15     16    17      18
-    # No OrderID CreateDate ProductID IsOPEN No ID OrderID Quantity LineID LineName No OrderedID ProductDetailID No ProductID ID Attribute Value
-    Ordered = {"ProductID": GroupHeader[3], "LineID": GroupHeader[9], "UserName": GroupHeader[10],"Selected" : []}
 
-    for OID in IDList:
+    IDList = []
+    for ODID in DBResult:
+        IDList.append(ODID[1])
+    IDList = set(IDList)
+
+    #  0     1         2        3          4            5             6        7
+    # O.ID, OD.ID, P.Name, P.Price, OD.LineName, OD.Quantity, PD.Attribute, PD.Value
+    Ordered = {"OrderID": GroupHeader[0], "ProductName": GroupHeader[2], "Price": int(GroupHeader[3]), "UserName": GroupHeader[4],"Selected" : []}
+
+    for ODID in IDList:
         SelectedOption = {"Quantity": 0, "Attribute":[]}
 
-        for Item in filter(lambda x: x[6] == OID, DBResult):
-            SelectedOption["Quantity"] = Item[8]
-            SelectedOption["Attribute"].append({"Name":Item[17], "Value":Item[18]})
+        for Item in filter(lambda x: x[1] == ODID, DBResult):
+            SelectedOption["OrderedID"] = Item[1]
+            SelectedOption["Quantity"] = Item[5]
+            SelectedOption["Attribute"].append({"Name":Item[6], "Value":Item[7]})
             # SelectedOption["Attribute"].append(Item[17] + ":" + Item[18])
 
         SelectedOption["Attribute"].sort(key= lambda s:s["Name"])
