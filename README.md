@@ -5,11 +5,11 @@
 ---
 
 二、操作說明:
-1. 介面
-![](https://i.imgur.com/x19Z57z.jpg)
-2. 查看商品資訊
-[如連結動圖所示](https://imgur.com/a/TYOkgka)
-3. 下訂商品
-[如連結動圖所示](https://imgur.com/a/InrUOpf)
-4. 查看購買訂單
-[如連結動圖所示](https://imgur.com/3csRlyM)
+介面
+* ![](https://i.imgur.com/x19Z57z.jpg)
+1. 查看商品資訊
+* [如連結動圖所示](https://imgur.com/a/TYOkgka)
+2. 下訂商品
+* [如連結動圖所示](https://imgur.com/a/InrUOpf)
+3. 查看購買訂單
+* [如連結動圖所示](https://imgur.com/3csRlyM)
