@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>TogetherGo</title>
+</head>
+<body class="text-center bg-light col-md-auto">
+  <form>
+    <div id="SelectorSection">
+    </div>
+    <input class = "btn btn-lg btn-primary btn-block" type="button" id="submitGo" onclick="suclick()" value="提交"></input>
+  </form>
+</body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="config.js"></script>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+<script type="text/javascript">
+var APIUrl = GetAPIUrl();
+var result;
+var result_Order;
+var section = $("#SelectorSection");
+liff.init({liffId: "1654404485-xDAMKvzY"});
+
+$.get(APIUrl+'Order/Lastest', function(res){
+	result_Order = res["Data"];
+	$.get(APIUrl+'ProductComplete/ID/'+ result_Order["ProductID"], function(res){ 
+		result = res["Data"][0];
+		console.log(result)
+		section.append("<h1 class='h3 mb-3 font-weight-normal'>" + result["Name"] + "</h1>")
+		section.append("<h1 class='h4 mb-3 font-weight-normal'> 價格:" + result["Price"] + "</h1>")
+		$.each(result["ProductDetail"],function(index, val){
+			section.append("<div> " + val["Attribute"] + "<select class='custom-select' id='"+ val["Attribute"] +"'></select></div>")
+			$.each(val["Value"],function(iidex, vval){
+				$("#"+val["Attribute"]).append("<option class='form-control' value='"+vval["ValueID"]+"''>"+vval["ValueName"]+"</option>")
+			})
+		})
+		section.append("<div>數量<input class='form-control' type='number' id='Quantity' value=0></input></div><br>")
+	}, "json")
+}, 'json');
+
+var suclick = function(){
+	liff.getProfile().then(function (profile) {
+	    // const userId = profile.userId;
+	    // const name = profile.displayName;
+	    // const pictureUrl = profile.pictureUrl;
+	    // const statusMessage = profile.statusMessage;
+    var Qua = $("#Quantity").val() == "" ? 0 : parseInt($("#Quantity").val());
+		var Ordered = {"OrderID": result_Order["ID"], "LineID": profile.userId, "LineName": profile.displayName, "Quantity": Qua,"OrderedDetail" : []};
+
+    $.each(result["ProductDetail"], function(index, val){
+      Ordered["OrderedDetail"].push({"Attribute": val["Attribute"], "ValueName":$("#"+ val["Attribute"] + " :selected").text(), "ValueID":$("#"+ val["Attribute"]).val()})
+    });
+
+    if(Qua == 0){
+      alert("請輸入數量")
+    }
+    else{
+      $.ajax({
+          url: APIUrl + "OrderedComplete",
+          method:'POST',
+          headers:{'Content-Type':'application/json; charset=UTF-8'},
+          data:JSON.stringify(Ordered),
+          success:function(data, Status, jqXHR){
+            if(data["Result"] == "Success"){
+              Push_Click(Ordered);
+            }
+          },
+          error:function (jqXHR, textStatus, errorThrown) { 
+            alert("errorThrown :" + errorThrown) 
+            }
+        });
+    }
+	});
+}
+
+var Push_Click = function(contents_selected){
+  var Url = 'https://ancient-mesa-96474.herokuapp.com/Test/LinePushMessage_CORSHelper/';
+
+  liff.getProfile().then(function (profile) {
+        $.ajax({
+          url: Url,
+          method:'POST',
+          headers:{'Content-Type':'application/json; charset=UTF-8'},
+          data:JSON.stringify({"to":profile.userId, "messages":[{"type":"flex","altText": "This is a Flex Message","contents":TransToFinishTemplate(contents_selected)}]}),
+          success:function(data, Status, jqXHR){
+              liff.closeWindow();
+            },
+          error:function (jqXHR, textStatus, errorThrown) { 
+            alert("errorThrown :" + errorThrown) 
+            }
+        });
+      })
+      .catch(function(error){
+        window.alert('Error: ' + error);
+      });
+}
+
+var TransToFinishTemplate = function(contents_selected){
+  var contents_contents = []
+  $.each(contents_selected["OrderedDetail"], function(index, val){
+    var contents_contents_contents = []
+    var contents_contents_template = {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": []
+          }
+
+    contents_contents_contents.push({
+      "type": "text",
+      "text": val["Attribute"],
+      "size": "sm",
+      "color": "#555555",
+      "flex": 0
+    })
+    contents_contents_contents.push({
+      "type": "text",
+      "text": val["ValueName"],
+      "size": "sm",
+      "color": "#111111",
+      "align": "end"
+    })
+
+    contents_contents_template["contents"] = contents_contents_contents
+    contents_contents.push(contents_contents_template)
+  });
+  contents_contents.push(
+  {
+    "type": "box",
+    "layout": "horizontal",
+    "contents": [
+      {
+        "type": "text",
+        "text": "數量",
+        "size": "sm",
+        "color": "#555555"
+      },
+      {
+        "type": "text",
+        "text": contents_selected["Quantity"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+        "size": "sm",
+        "color": "#111111",
+        "align": "end"
+      }
+    ]
+  })
+  contents_contents.push({
+    "type": "separator",
+    "margin": "xxl"
+  },
+  {
+    "type": "box",
+    "layout": "horizontal",
+    "contents": [
+      {
+        "type": "text",
+        "text": "總金額",
+        "size": "sm",
+        "color": "#555555"
+      },
+      {
+        "type": "text",
+        "text": "NT$" + (parseInt(contents_selected["Quantity"]) * parseInt(result["Price"])).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+        "size": "sm",
+        "color": "#111111",
+        "align": "end"
+      }
+    ]
+  })
+
+  var detail = {
+    "type": "bubble",
+    "body": {
+      "type": "box",
+      "layout": "vertical",
+      "contents": [
+        {
+          "type": "text",
+          "text": "訂購完成",
+          "weight": "bold",
+          "color": "#1DB446",
+          "size": "sm"
+        },
+        {
+          "type": "text",
+          "text": result["Name"],
+          "weight": "bold",
+          "size": "xxl",
+          "margin": "md"
+        },
+        {
+          "type": "text",
+          "text": "備註",
+          "size": "xs",
+          "color": "#aaaaaa",
+          "wrap": true
+        },
+        {
+          "type": "separator",
+          "margin": "xxl"
+        },
+        {
+          "type": "box",
+          "layout": "vertical",
+          "margin": "xxl",
+          "spacing": "sm",
+          "contents": contents_contents
+        },
+        {
+          "type": "separator",
+          "margin": "xxl"
+        }
+      ]
+    },
+    "styles": {
+      "footer": {
+        "separator": true
+      }
+    }
+  }
+
+  return detail;
+}
+</script>
