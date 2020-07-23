@@ -6,8 +6,7 @@
 
 二、操作說明:
 1. 介面
-![](https://i.imgur.com/1dpQKA0.jpg)
-
+![](https://i.imgur.com/x19Z57z.jpg)
 2. 查看商品資訊
 [如連結動圖所示](https://imgur.com/a/TYOkgka)
 3. 下訂商品
