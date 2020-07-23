@@ -5,7 +5,7 @@
 ---
 
 二、操作說明:
-介面
+* 介面
 * ![](https://i.imgur.com/x19Z57z.jpg)
 1. 查看商品資訊
 * [如連結動圖所示](https://imgur.com/a/TYOkgka)
