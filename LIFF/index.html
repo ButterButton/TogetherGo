@@ -78,7 +78,7 @@ var suclick = function(){
 }
 
 var Push_Click = function(contents_selected){
-  var Url = 'https://ancient-mesa-96474.herokuapp.com/Test/LinePushMessage_CORSHelper/';
+  var Url = GetAPIUrl_CROS();
 
   liff.getProfile().then(function (profile) {
         $.ajax({
