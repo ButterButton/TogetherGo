@@ -1,6 +1,0 @@
-Flask
-flask-cors
-pytz
-mysql-connector-python
-configparser
-waitress
